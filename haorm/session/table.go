@@ -39,3 +39,19 @@ func (s *Session) CreateTable() error {
 	_, err := s.Raw(fmt.Sprintf("CREATE TABLE %s (%s);", table.Name, desc)).Exec()
 	return err
 }
+
+//删除表
+func (s *Session) DropTable() error {
+	_, err := s.Raw(fmt.Sprintf("Drop table if exists %s", s.RefTable().Name)).Exec()
+	return err
+}
+
+//判断对应的表是否存在
+func (s *Session) HasTable() bool {
+	sql, value := s.dialect.TableExistSQL(s.RefTable().Name, s.dbName)
+	row := s.Raw(sql, value...).QueryRow()
+	var tmp string
+	_ = row.Scan(&tmp)
+	//mysql 都是小写的名字所以得转换成小写
+	return tmp == strings.ToLower(s.RefTable().Name)
+}

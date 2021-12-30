@@ -25,7 +25,7 @@ func (m *mysql) DataTypeOf(typ reflect.Value) string {
 	case reflect.Float32, reflect.Float64:
 		return "double"
 	case reflect.String:
-		return "varchar"
+		return "varchar(255)"
 	case reflect.Array, reflect.Slice:
 		return "text"
 	case reflect.Bool:

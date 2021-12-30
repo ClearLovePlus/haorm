@@ -2,6 +2,7 @@ package hao
 
 import (
 	"database/sql"
+	"gochen/haorm/dialect"
 	log "gochen/haorm/log"
 	session "gochen/haorm/session"
 	"time"
@@ -14,10 +15,20 @@ var defaultLiveTimeout time.Duration = 100
 
 //自定义orm的主要入口，用于配置各种数据库
 type Engine struct {
-	db *sql.DB
+	db      *sql.DB
+	dbName  string
+	dialect dialect.Dialect
 }
 
-func NewEngine(driver, source string, idleNum, maxConnect int, idleTimeout, liveTimeout time.Duration) (e *Engine, err error) {
+func NewEngine(driver, source string, idleNum, maxConnect int, idleTimeout, liveTimeout time.Duration, dbName string) (e *Engine, err error) {
+	if dbName == "" {
+		log.Error("dbName can not be null")
+		return
+	}
+	dial, ok := dialect.GetDialect(driver)
+	if !ok {
+		log.Errorf("%s dialect cannot be null,should create the dialect belong to %s", driver, driver)
+	}
 	db, err := sql.Open(driver, source)
 	if err != nil {
 		log.Error(err)
@@ -51,7 +62,11 @@ func NewEngine(driver, source string, idleNum, maxConnect int, idleTimeout, live
 	} else {
 		db.SetConnMaxLifetime(liveTimeout)
 	}
-	e = &Engine{db: db}
+	e = &Engine{
+		db:      db,
+		dbName:  dbName,
+		dialect: dial,
+	}
 	log.Info("connect database succes")
 	return
 }
@@ -64,5 +79,5 @@ func (engine *Engine) Close() {
 }
 
 func (enginde *Engine) NewSession() *session.Session {
-	return session.New(enginde.db)
+	return session.New(enginde.db, enginde.dialect, enginde.dbName)
 }

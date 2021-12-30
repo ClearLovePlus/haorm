@@ -13,7 +13,8 @@ var mu sync.Mutex
 
 //和数据库交互的session对象
 type Session struct {
-	db *sql.DB
+	db     *sql.DB
+	dbName string
 	//sql语句
 	sql      strings.Builder
 	dialect  dialect.Dialect
@@ -21,10 +22,11 @@ type Session struct {
 	sqlVars  []interface{}
 }
 
-func New(db *sql.DB, dialect dialect.Dialect) *Session {
+func New(db *sql.DB, dialect dialect.Dialect, dbName string) *Session {
 	return &Session{
 		db:      db,
 		dialect: dialect,
+		dbName:  dbName,
 	}
 }
 
@@ -33,6 +35,7 @@ func (s *Session) Clear() {
 	defer mu.Unlock()
 	s.sql.Reset()
 	s.sqlVars = nil
+	s.dbName = ""
 }
 
 func (s *Session) DB() *sql.DB {
