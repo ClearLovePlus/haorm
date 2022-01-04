@@ -2,6 +2,7 @@ package haosession
 
 import (
 	"database/sql"
+	"gochen/haorm/clause"
 	"gochen/haorm/dialect"
 	log "gochen/haorm/log"
 	"gochen/haorm/schema"
@@ -19,6 +20,7 @@ type Session struct {
 	sql      strings.Builder
 	dialect  dialect.Dialect
 	refTable *schema.Schema
+	clause   clause.Clause
 	sqlVars  []interface{}
 }
 
@@ -36,6 +38,7 @@ func (s *Session) Clear() {
 	s.sql.Reset()
 	s.sqlVars = nil
 	s.dbName = ""
+	s.clause = clause.Clause{}
 }
 
 func (s *Session) DB() *sql.DB {
