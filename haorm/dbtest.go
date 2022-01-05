@@ -1,7 +1,10 @@
 package hao
 
 import (
+	haolog "gochen/haorm/log"
+	haosession "gochen/haorm/session"
 	"log"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -11,8 +14,39 @@ type Test1 struct {
 	Age  int
 }
 
+type Account struct {
+	ID          int `haorm:"PRIMARY KEY"`
+	UserName    string
+	UserAccount string
+	Password    string
+	CreateDate  time.Time
+	UpdateDate  time.Time
+}
+
+func (ac *Account) AfterQuery(s *haosession.Session) error {
+	haolog.Info("after query", ac)
+	ac.Password = "********"
+	return nil
+}
+
+func (ac *Account) BeforeInsert(s *haosession.Session) error {
+	haolog.Info("before insert step 1", ac)
+	ac.Password = "default"
+	haolog.Info("before insert step 2", ac)
+	return nil
+}
+
+var (
+	user1 = &Test1{"tom", 18}
+	user2 = &Test1{"alan", 19}
+)
+
+var (
+	account1 = &Account{1, "chen", "111", "1111", time.Now(), time.Now()}
+)
+
 func DbTest() {
-	engine, err := NewEngine("mysql", "root:root@tcp(127.0.0.1:3306)/blog", 1, 10, 10, 100, "blog")
+	engine, err := NewEngine("mysql", "root:root@tcp(127.0.0.1:3306)/blog?charset=utf8&parseTime=True&loc=Local", 1, 10, 10, 100, "blog")
 	if err != nil {
 		log.Fatal("start dataBase error", err)
 	}
@@ -49,10 +83,33 @@ func DbTest() {
 	// }
 
 	//day 2 test
-	s.Model(&Test1{})
-	s.DropTable()
-	s.CreateTable()
-	if !s.HasTable() {
-		log.Fatal("Failed to create table User")
+	s.Model(&Account{})
+	err2 := s.DropTable()
+	err1 := s.CreateTable()
+	_, err3 := s.Insert(account1)
+	if err1 != nil || err2 != nil || err3 != nil {
+		log.Fatal("insert data error")
+	}
+
+	//limit test
+	var users []Account
+	err4 := s.Limit(1).Select(&users)
+	if err4 != nil {
+		log.Fatal("limit test error")
+	}
+	log.Println(users)
+	//update test
+	affected, _ := s.Where("username = ?", "chen").Update("UserAccount", "6666")
+	u := &Account{}
+	_ = s.OrderBy("ID Desc").SelectOne(u)
+
+	if affected != 1 {
+		log.Fatal("update test error")
+	}
+	log.Println(u)
+	//delete and count test
+	count, _ := s.Count()
+	if count != 1 {
+		log.Fatal("delet and count error")
 	}
 }

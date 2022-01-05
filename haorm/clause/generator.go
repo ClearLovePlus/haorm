@@ -76,9 +76,9 @@ func _where(values ...interface{}) (string, []interface{}) {
 func _limit(values ...interface{}) (string, []interface{}) {
 	length := len(values)
 	if length == 2 {
-		return fmt.Sprint("limit ?,?", values[0], values[1]), []interface{}{}
+		return fmt.Sprintf("limit %d,%d", values[0], values[1]), []interface{}{}
 	} else {
-		return fmt.Sprint("limit ?", values[0]), []interface{}{}
+		return fmt.Sprintf("limit %d", values[0]), []interface{}{}
 	}
 }
 
@@ -95,7 +95,7 @@ func _update(values ...interface{}) (string, []interface{}) {
 	var keys []string
 	var value []interface{}
 	for k, v := range m {
-		keys = append(keys, k)
+		keys = append(keys, k+"= ?")
 		value = append(value, v)
 
 	}

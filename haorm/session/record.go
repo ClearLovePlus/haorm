@@ -1,6 +1,7 @@
 package haosession
 
 import (
+	"errors"
 	"gochen/haorm/clause"
 	"reflect"
 )
@@ -11,6 +12,7 @@ func (s *Session) Insert(values ...interface{}) (int64, error) {
 	for _, value := range values {
 		table := s.Model(value).RefTable()
 		s.clause.Set(clause.INSERT, table.Name, table.FieldNames)
+		s.CallMethod(BeforeInsert, nil)
 		recordValue = append(recordValue, table.RecordValue(value))
 	}
 	s.clause.Set(clause.VALUES, recordValue...)
@@ -23,7 +25,7 @@ func (s *Session) Insert(values ...interface{}) (int64, error) {
 }
 
 //查询的入口方法，各种语句得前置操作
-func (s *Session) Select(values ...interface{}) error {
+func (s *Session) Select(values interface{}) error {
 	//反射获取切片
 	destSlice := reflect.Indirect(reflect.ValueOf(values))
 	//获取单个切片的类型
@@ -46,6 +48,7 @@ func (s *Session) Select(values ...interface{}) error {
 			return err
 		}
 		destSlice.Set(reflect.Append(destSlice, dest))
+		s.CallMethod(AfterQuery, dest)
 	}
 	return row.Close()
 
@@ -112,4 +115,19 @@ func (s *Session) Where(desc string, args ...interface{}) *Session {
 func (s *Session) OrderBy(desc string) *Session {
 	s.clause.Set(clause.ORDERBY, desc)
 	return s
+}
+
+func (s *Session) SelectOne(value interface{}) error {
+	//reflect.Valueof==>返回这个interface 所在的地址，也就是返回值指针
+	//reflect.Indirce==>通过指针指向的interface
+	dest := reflect.Indirect(reflect.ValueOf(value))
+	destSlice := reflect.New(reflect.SliceOf(dest.Type())).Elem()
+	if err := s.Limit(1).Select(destSlice.Addr().Interface()); err != nil {
+		return err
+	}
+	if destSlice.Len() == 0 {
+		return errors.New("the record is not exist")
+	}
+	dest.Set(destSlice.Index(0))
+	return nil
 }
