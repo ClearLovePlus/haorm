@@ -1,6 +1,6 @@
 package haosession
 
-import haolog "gochen/haorm/log"
+import haolog "github.com/ClearLovePlus/haorm/log"
 
 //开启事务方法
 func (s *Session) Begin() (err error) {

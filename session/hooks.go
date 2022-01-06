@@ -1,8 +1,9 @@
 package haosession
 
 import (
-	haolog "gochen/haorm/log"
 	"reflect"
+
+	haolog "github.com/ClearLovePlus/haorm/log"
 )
 
 // Hooks constants

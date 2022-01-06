@@ -3,10 +3,11 @@ package haosession
 import (
 	"errors"
 	"fmt"
-	haolog "gochen/haorm/log"
-	"gochen/haorm/schema"
 	"reflect"
 	"strings"
+
+	haolog "github.com/ClearLovePlus/haorm/log"
+	"github.com/ClearLovePlus/haorm/schema"
 )
 
 func (s *Session) Model(value interface{}) *Session {

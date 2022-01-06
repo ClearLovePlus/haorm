@@ -2,8 +2,9 @@ package schema
 
 import (
 	"go/ast"
-	"gochen/haorm/dialect"
 	"reflect"
+
+	"github.com/ClearLovePlus/haorm/dialect"
 )
 
 //每一行 column 的结构

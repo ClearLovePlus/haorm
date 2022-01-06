@@ -1,11 +1,12 @@
-package hao
+package main
 
 import (
 	"errors"
-	haolog "gochen/haorm/log"
-	haosession "gochen/haorm/session"
 	"log"
 	"time"
+
+	haolog "github.com/ClearLovePlus/haorm/log"
+	haosession "github.com/ClearLovePlus/haorm/session"
 
 	_ "github.com/go-sql-driver/mysql"
 )

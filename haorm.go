@@ -1,11 +1,12 @@
-package hao
+package main
 
 import (
 	"database/sql"
-	"gochen/haorm/dialect"
-	log "gochen/haorm/log"
-	session "gochen/haorm/session"
 	"time"
+
+	"github.com/ClearLovePlus/haorm/dialect"
+	log "github.com/ClearLovePlus/haorm/log"
+	session "github.com/ClearLovePlus/haorm/session"
 )
 
 var defalutIdleNum int = 1

@@ -1,8 +1,9 @@
 package dialect
 
 import (
-	haolog "gochen/haorm/log"
 	"reflect"
+
+	haolog "github.com/ClearLovePlus/haorm/log"
 )
 
 var dialectMap = map[string]Dialect{}

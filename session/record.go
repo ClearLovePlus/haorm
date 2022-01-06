@@ -2,8 +2,9 @@ package haosession
 
 import (
 	"errors"
-	"gochen/haorm/clause"
 	"reflect"
+
+	"github.com/ClearLovePlus/haorm/clause"
 )
 
 //插入数据执行语句

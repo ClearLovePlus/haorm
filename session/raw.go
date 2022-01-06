@@ -2,12 +2,13 @@ package haosession
 
 import (
 	"database/sql"
-	"gochen/haorm/clause"
-	"gochen/haorm/dialect"
-	log "gochen/haorm/log"
-	"gochen/haorm/schema"
 	"strings"
 	"sync"
+
+	"github.com/ClearLovePlus/haorm/clause"
+	"github.com/ClearLovePlus/haorm/dialect"
+	log "github.com/ClearLovePlus/haorm/log"
+	"github.com/ClearLovePlus/haorm/schema"
 )
 
 var mu sync.Mutex
