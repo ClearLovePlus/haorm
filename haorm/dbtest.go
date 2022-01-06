@@ -1,6 +1,7 @@
 package hao
 
 import (
+	"errors"
 	haolog "gochen/haorm/log"
 	haosession "gochen/haorm/session"
 	"log"
@@ -45,6 +46,21 @@ var (
 	account1 = &Account{1, "chen", "111", "1111", time.Now(), time.Now()}
 )
 
+func transactionRollback(engin *Engine, s *haosession.Session) {
+	_ = s.Model(&Test1{}).DropTable()
+	_ = s.Model(&Test1{}).CreateTable()
+	_, err := engin.Transation(func(s *haosession.Session) (interface{}, error) {
+		//由于mysql在执行ddl语句之后会隐式的commit 所以这里的回滚测试并不能生效
+		//_ = s.Model(&Test1{}).CreateTable()
+		s.Insert(&Test1{"chen", 18})
+		s.Where("name = ?", "chen").Update("Age", 19)
+		return nil, errors.New("ERROR")
+	})
+	if err == nil || s.HasTable() {
+		log.Fatal("failed to rollback")
+	}
+
+}
 func DbTest() {
 	engine, err := NewEngine("mysql", "root:root@tcp(127.0.0.1:3306)/blog?charset=utf8&parseTime=True&loc=Local", 1, 10, 10, 100, "blog")
 	if err != nil {
@@ -82,6 +98,7 @@ func DbTest() {
 	// 	fmt.Printf("Exec success, %d affected\n", count)
 	// }
 
+	transactionRollback(engine, s)
 	//day 2 test
 	s.Model(&Account{})
 	err2 := s.DropTable()

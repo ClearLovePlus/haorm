@@ -22,7 +22,16 @@ type Session struct {
 	refTable *schema.Schema
 	clause   clause.Clause
 	sqlVars  []interface{}
+	tx       *sql.Tx
 }
+type CommonDB interface {
+	Query(query string, args ...interface{}) (*sql.Rows, error)
+	QueryRow(query string, args ...interface{}) *sql.Row
+	Exec(query string, args ...interface{}) (sql.Result, error)
+}
+
+var _ CommonDB = (*sql.DB)(nil)
+var _ CommonDB = (*sql.Tx)(nil)
 
 func New(db *sql.DB, dialect dialect.Dialect, dbName string) *Session {
 	return &Session{
@@ -31,7 +40,13 @@ func New(db *sql.DB, dialect dialect.Dialect, dbName string) *Session {
 		dbName:  dbName,
 	}
 }
+func (s *Session) DB() CommonDB {
+	if s.tx != nil {
+		return s.tx
+	}
+	return s.db
 
+}
 func (s *Session) Clear() {
 	mu.Lock()
 	defer mu.Unlock()
@@ -39,10 +54,6 @@ func (s *Session) Clear() {
 	s.sqlVars = nil
 	s.dbName = ""
 	s.clause = clause.Clause{}
-}
-
-func (s *Session) DB() *sql.DB {
-	return s.db
 }
 
 func (s *Session) Raw(sql string, values ...interface{}) *Session {

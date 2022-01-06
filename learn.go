@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
+	hao "gochen/haorm"
 	"gochen/haorm/dialect"
-	"gochen/haorm/schema"
-	"log"
 	"sync"
 	"time"
 )
@@ -149,12 +148,12 @@ func main() {
 	// 	component.BfReader()
 	// 	bubble := []int{6, 4, 7, 9, 1}
 	// 	component.BubbleSort(bubble)
-	// hao.DbTest()
-	schema := schema.Parse(&Test{}, TestDialect)
-	if schema.Name != "Test" || len(schema.Fields) != 2 {
-		log.Println("parse error")
-	}
-	if schema.GetField("Name").Tag != "PRIMARY KEY" {
-		log.Fatal("failed to parse primary key")
-	}
+	hao.DbTest()
+	// schema := schema.Parse(&Test{}, TestDialect)
+	// if schema.Name != "Test" || len(schema.Fields) != 2 {
+	// 	log.Println("parse error")
+	// }
+	// if schema.GetField("Name").Tag != "PRIMARY KEY" {
+	// 	log.Fatal("failed to parse primary key")
+	// }
 }

@@ -20,6 +20,8 @@ type Engine struct {
 	dialect dialect.Dialect
 }
 
+type TxFunc func(*session.Session) (interface{}, error)
+
 func NewEngine(driver, source string, idleNum, maxConnect int, idleTimeout, liveTimeout time.Duration, dbName string) (e *Engine, err error) {
 	if dbName == "" {
 		log.Error("dbName can not be null")
@@ -80,4 +82,24 @@ func (engine *Engine) Close() {
 
 func (enginde *Engine) NewSession() *session.Session {
 	return session.New(enginde.db, enginde.dialect, enginde.dbName)
+}
+
+func (engine *Engine) Transation(f TxFunc) (result interface{}, err error) {
+	s := engine.NewSession()
+	if err := s.Begin(); err != nil {
+		return nil, err
+	}
+	defer func() {
+		if p := recover(); p != nil {
+			_ = s.Rollback()
+			panic(p)
+		} else if err != nil {
+			_ = s.Rollback()
+		} else {
+			if err1 := s.Commit(); err1 != nil {
+				_ = s.Rollback()
+			}
+		}
+	}()
+	return f(s)
 }
